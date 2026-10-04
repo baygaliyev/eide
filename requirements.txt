@@ -1,0 +1,45 @@
+# Runtime dependencies for the EIDE pipeline.
+#
+# IMPORTANT — two dependencies are NOT installable from PyPI and are therefore
+# absent from this list; see "Known limitations" in README.md.
+#   * util_funcs            — module was never committed to this repository
+#   * mobility_airpollution — internal module (mobility_airpollution.mobair)
+
+# --- core scientific stack ---
+numpy>=1.21
+pandas>=1.3
+scipy>=1.7
+
+# --- geospatial ---
+geopandas>=0.10
+shapely>=2.0
+pyproj>=3.2
+networkx>=2.6
+
+# osmnx is constrained to the 1.x series on purpose.
+# The notebooks were authored against the osmnx 1.x top-level API; the call
+# `osmnx.bbox_from_place(...)` used in step 3/4 no longer exists in osmnx 2.x.
+# A stored traceback in 3_4_dispersion_and_exposure.ipynb records exactly this
+# failure ("module 'osmnx' has no attribute 'bbox_from_place'").
+osmnx>=1.4,<2.0
+
+# --- plotting / figures ---
+matplotlib>=3.4
+folium>=0.12
+
+# --- imputation + validation models ---
+scikit-learn>=1.0
+xgboost>=1.5
+
+# --- misc ---
+requests>=2.26
+
+# --- used only by 1_calculate_weekly_emissions.py ---
+# Trajectory filtering, map matching and emission factors.
+# NOTE: scikit-mobility is not reliably pip-installable; conda-forge is
+# recommended:  conda install -c conda-forge scikit-mobility rtree
+scikit-mobility>=0.9
+
+# PostgreSQL driver. Imported but not used in the current script; kept so the
+# import does not break, remove it if you do not use a database backend.
+psycopg2-binary>=2.9

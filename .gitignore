@@ -1,0 +1,32 @@
+# --- input data (NOT redistributable) -------------------------------
+# The pipeline consumes restricted vehicular GPS trajectories and derived
+# emissions tables. These are deliberately excluded from version control.
+data/
+*.csv
+*.csv.gz
+*.xz
+*.tar
+*.parquet
+*.feather
+
+# --- generated outputs ---------------------------------------------
+outputs/
+results/
+figures_out/
+*.html
+!docs/*.html
+
+# --- environment / tooling ------------------------------------------
+.env
+.venv/
+venv/
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# --- credentials ----------------------------------------------------
+# TomTom API key used by get_route_tomtom() in step 3/4.
+.env
+secrets.py
+config.local.*
