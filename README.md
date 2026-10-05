@@ -44,6 +44,7 @@ BibTeX:
 | File | Step | Description |
 |---|---|---|
 | `1_calculate_weekly_emissions.py` | 1 | Road-level emission factors for links covered by GPS traces (COPERT-style speed/acceleration functions, vehicle-type matching, map matching) |
+| `util_funcs.py` | 1 | Spatial tessellation helpers used by step 1 (square tiling, selection of trajectories inside it) |
 | `2_missing_emission_data_imputation.ipynb` | 2 | XGBoost regression to impute emissions for road links without trajectory coverage |
 | `3_4_dispersion_and_exposure.ipynb` | 3–4 | Gaussian plume dispersion to concentration fields, then exposure for static and moving entities; also contains the validation sections |
 | `validation_of_emission_model.ipynb` | — | Model validation before and after imputation, for Rome, Borghetto, Passi and Pisa |
@@ -55,16 +56,43 @@ Intended execution order: **1 → 2 → 3/4**, with
 
 Please read this before trying to run the pipeline.
 
-**Step 1 cannot be executed as published.** It depends on two modules that are
-not available from this repository or from PyPI:
+**Both third-party dependencies of step 1 are now resolvable.** Neither is on
+PyPI, so neither appears in `requirements.txt`:
 
-- **`util_funcs`** — `1_calculate_weekly_emissions.py` imports
-  `download_square_tessellation(...)` and
-  `select_trajectories_within_tessellation(...)` from a module `util_funcs`
-  that has never been committed here. Without it the script fails at import.
-- **`mobility_airpollution.mobair`** — provides trajectory filtering, speed and
-  acceleration computation, map matching and emission-factor handling. This is
-  an internal module and is not publicly released.
+- **`mobair`** — provides trajectory filtering, speed and acceleration
+  computation, map matching and emission-factor handling. It is **public**, at
+  <https://github.com/matteoboh/mobility_emissions> (MIT licence), from Böhm,
+  Nanni and Pappalardo, *Gross polluters and vehicle emissions reduction*,
+  Nature Sustainability (2022), <https://doi.org/10.1038/s41893-022-00903-x>.
+  Install it from git:
+
+  ```bash
+  pip install git+https://github.com/matteoboh/mobility_emissions.git
+  ```
+
+  That repository was formerly named `mobility_airpollution`, which is why this
+  pipeline refers to it by that name in places. The old URL still redirects.
+  Step 1 now imports it as `mobair`, matching that project's own documented
+  usage, rather than treating a repository name as a Python package.
+- **`util_funcs`** — was never committed to the author's earlier repository. The
+  two functions step 1 needs, `download_square_tessellation(...)` and
+  `select_trajectories_within_tessellation(...)`, are now provided in
+  `util_funcs.py` in this repository.
+
+**What still blocks step 1 is the input data, not the code.** Step 1 reads
+`data/trajectories/<area>_trajectories_week_<n>.csv` and
+`data/road_networks/<city>_network.graphml`; see *Data requirements* below. The
+trajectories are restricted and are not in this repository, so the script can be
+imported and its tessellation stage exercised, but not run end to end without
+data obtained through the original data agreement.
+
+The original `util_funcs` module also contained a PostgreSQL downloader for
+those restricted traces, held in the KDD Lab database. That code is
+deliberately **not** reproduced: it is not needed for the tessellation stage, and
+`util_funcs` here reads no credentials and opens no database connection.
+
+`mobair` pins `osmnx==1.1.1` and `scikit-mobility==1.2.2` in its own
+`environment.yml`, which is consistent with the `osmnx` 1.x constraint below.
 
 Steps 2–4 (the notebooks) depend only on publicly available packages and are
 the substantive part of the pipeline. The notebook outputs are committed
@@ -77,6 +105,12 @@ traceback in `3_4_dispersion_and_exposure.ipynb` records a failure against
 (`KeyError: 'week'`, `NameError: name 'df_sorted' is not defined`) are
 mid-notebook development artefacts, not part of the final result.
 
+`util_funcs.select_trajectories_within_tessellation(...)` uses
+`DataFrameGroupBy.apply`, which recent pandas releases warn about
+(`FutureWarning: DataFrameGroupBy.apply operated on the grouping columns`). The
+warning is benign here — the callback only reads `tile_ID`, which is not a
+grouping column — and the code is reproduced as originally written.
+
 ## Data requirements
 
 **No input data is included in this repository**, by design. The pipeline
@@ -85,7 +119,7 @@ requires:
 - `data/trajectories/<area>_trajectories_week_<n>.csv` — vehicular GPS traces.
   Columns referenced in the code include `uid`, `lat`, `lon`, `week` and
   `week_start`; the exact time-column name depends on the
-  `mobility_airpollution` loader used in step 1
+  `mobair` trajectory loader used in step 1
 - `data/road_networks/<city>_network.graphml` — directed OSM network,
   buildable with `osmnx`
 - `data/emission_functions.csv` — emission factors by speed and acceleration
@@ -140,8 +174,8 @@ byte-identical to the last good revision, verified by git blob hash
 
 MIT — see [LICENSE](LICENSE).
 
-The `mobility_airpollution` package required by step 1 is **not** distributed
-here and is not covered by this license.
+The `mobair` package required by step 1 is **not** distributed here and is not
+covered by this license; it carries its own MIT license from its authors.
 
 ## Acknowledgement
 

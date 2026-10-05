@@ -10,7 +10,7 @@ import util_funcs as uf # this is a file in the directory with some functions
 
 import geopandas as gpd
 import json
-import mobility_airpollution.mobair as mb
+import mobair as mb
 import numpy as np
 import osmnx as ox  # version '0.16.0' or greater
 import pandas as pd
@@ -72,7 +72,7 @@ for week in range(22, 23):
             print("Number of uids in {} after applying tesellation map: {} \nNumber of rows left: {} \n".format(city, tdf['uid'].nunique(), len(tdf)))
             print("\nFiltering trajectories on time interval, speed and acceleration\n")
             
-        from mobility_airpollution.mobair import filtering
+        from mobair import filtering
         # if points are distant (t>120), trajectories are split a (5) b (10) c - (120) - d (30) e ( discard d and e if 120 instead of 30)
         # 70 seconds on average
         # we have traj ids, distant parts of the traj counted as separate trajs
@@ -82,7 +82,7 @@ for week in range(22, 23):
         
         tdf_filtered_time = filtering.filter_on_time_interval(tdf, max_interval)
 
-        from mobility_airpollution.mobair import speed
+        from mobair import speed
         tdf_with_speed_and_acc = speed.compute_acceleration_from_tdf(tdf_filtered_time)
 
         ftdf = tdf_with_speed_and_acc.loc[(tdf_with_speed_and_acc['speed'] < 300)]
@@ -101,10 +101,10 @@ for week in range(22, 23):
         # Taking the undirected version of the network:
         road_network = ox.get_undirected(road_network_directed)
 
-        from mobility_airpollution.mobair import mapmatching
+        from mobair import mapmatching
         ftdf_final = mapmatching.find_nearest_edges_in_network(road_network, ftdf, return_tdf_with_new_col=True)
 
-        from mobility_airpollution.mobair import emissions
+        from mobair import emissions
         import tarfile
 
         tar = tarfile.open(path_to_table_with_info_on_vehicles, "r:xz")
