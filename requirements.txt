@@ -1,9 +1,14 @@
 # Runtime dependencies for the EIDE pipeline.
 #
-# IMPORTANT — two dependencies are NOT installable from PyPI and are therefore
-# absent from this list; see "Known limitations" in README.md.
-#   * util_funcs            — module was never committed to this repository
-#   * mobility_airpollution — internal module (mobility_airpollution.mobair)
+# One dependency of step 1 is NOT on PyPI and is therefore absent from this
+# list; see "Known limitations" in README.md.
+#
+#   mobair  --  pip install git+https://github.com/matteoboh/mobility_emissions.git
+#              (formerly named mobility_airpollution; MIT licensed; pins
+#               osmnx==1.1.1 and scikit-mobility==1.2.2 in its environment.yml)
+#
+# `util_funcs` was a second blocker and is now resolved: the two tessellation
+# helpers step 1 needs are included in util_funcs.py in this repository.
 
 # --- core scientific stack ---
 numpy>=1.21
