@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated paper."
+title: "EIDE: From GPS Traces to Individual Emission Exposure"
+type: software
+authors:
+  - family-names: Aliyev
+    given-names: Gurban
+    orcid: https://orcid.org/0009-0009-7398-055X
+  - family-names: Nanni
+    given-names: Mirco
+    orcid: https://orcid.org/0000-0003-3534-4332
+repository-code: https://github.com/baygaliyev/eide
+url: https://github.com/baygaliyev/eide
+license: MIT
+version: 1.0.0
+date-released: 2026-11-26
+preferred-citation:
+  type: conference-paper
+  title: "From GPS Traces to Individual Emission Exposure: A Data-Driven Four-Step Process"
+  authors:
+    - family-names: Aliyev
+      given-names: Gurban
+      orcid: https://orcid.org/0009-0009-7398-055X
+    - family-names: Nanni
+      given-names: Mirco
+      orcid: https://orcid.org/0000-0003-3534-4332
+  collection-title: "Lecture Notes of the Institute for Computer Sciences, Social Informatics and Telecommunications Engineering"
+  publisher:
+    name: Springer
+  year: 2024
+  start: 64
+  end: 82
+  doi: 10.1007/978-3-031-86370-7_5

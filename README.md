@@ -28,7 +28,7 @@ If you use this code, please cite the associated paper:
 BibTeX:
 
 ```bibtex
-@inproceedings{aliyev2024gps,
+@inproceedings{aliyev2024eide,
   title     = {From GPS Traces to Individual Emission Exposure: A Data-Driven Four-Step Process},
   author    = {Aliyev, Gurban and Nanni, Mirco},
   booktitle = {International Conference on Intelligent Transport Systems (INTSYS 2024)},
@@ -39,24 +39,58 @@ BibTeX:
 }
 ```
 
+## Relation to the PhD thesis and later work
+
+The pipeline and the paper above also formed the basis of one chapter of the
+author's PhD thesis, *Analysis and Routing-Based Mitigation of Vehicular Air
+Pollution Exposure* (Università di Pisa, National PhD in Artificial
+Intelligence). The INTSYS paper remains the primary citation for this code.
+
+This repository is the frozen artifact for INTSYS 2024; a newer local version
+of the missing-data imputation stage (MDI) is kept separately and is not
+included here. The step-2 notebook below is a cleaned derivative, not a complete
+record of every MDI experiment or derived figure.
+
+The paper also reports SARN embeddings and an SI-GCN baseline produced outside
+this repository. The SARN implementation is a public fork at
+[github.com/baygaliyev/SARN](https://github.com/baygaliyev/SARN). The SI-GCN
+model code is a public fork of
+[susurrant/flow-imputation](https://github.com/susurrant/flow-imputation) at
+[github.com/baygaliyev/flow-imputation](https://github.com/baygaliyev/flow-imputation);
+`si_gcn_data_prep.ipynb` here contains only the cleaned Pisa data-preparation
+steps and does not train the model.
+
+Earlier context is in Gurban Aliyev, *Analysis, Prediction and Mitigation of
+Exposure to Vehicular Air Pollution Based on Multi-Source Urban Data*, SEBD
+2023, CEUR Workshop Proceedings 3478, pp. 674–680,
+<https://ceur-ws.org/Vol-3478/paper13.pdf>. It reports preliminary MDI/SI-GCN
+experiments and discusses the PhD project that later developed into this
+pipeline. The INTSYS paper remains the primary citation for this code.
+
 ## Repository contents
 
 | File | Step | Description |
 |---|---|---|
 | `1_calculate_weekly_emissions.py` | 1 | Road-level emission factors for links covered by GPS traces (COPERT-style speed/acceleration functions, vehicle-type matching, map matching) |
 | `util_funcs.py` | 1 | Spatial tessellation helpers used by step 1 (square tiling, selection of trajectories inside it) |
-| `2_missing_emission_data_imputation.ipynb` | 2 | XGBoost regression to impute emissions for road links without trajectory coverage |
-| `3_4_dispersion_and_exposure.ipynb` | 3–4 | Gaussian plume dispersion to concentration fields, then exposure for static and moving entities; also contains the validation sections |
-| `validation_of_emission_model.ipynb` | — | Model validation before and after imputation, for Rome, Borghetto, Passi and Pisa |
+| `2_missing_emission_data_imputation.ipynb` | 2 | Model comparison for imputing emissions on road links without trajectory coverage (linear regression, XGBoost, SVR, MLP, and classification/regression variants) |
+| `mdi_results.ipynb` | 2 (results) | Extracted surviving local outputs for the MDI result tables; a result-extract, not the full MDI workflow |
+| `3_4_dispersion_and_exposure.ipynb` | 3–4 | Gaussian plume dispersion to concentration fields, then exposure for static and moving entities |
+| `validation_of_emission_model.ipynb` | — | Rome station validation reported in the paper, plus clearly labelled supplementary sensor comparisons for Rome, Borghetto, Passi and Pisa |
+| `si_gcn_data_prep.ipynb` | 2 (context) | Cleaned Pisa data preparation for the separate SI-GCN baseline; model training lives in the fork linked above |
 
 Intended execution order: **1 → 2 → 3/4**, with
 `validation_of_emission_model.ipynb` used to check the emission model.
+`si_gcn_data_prep.ipynb` is a separate context artifact and is not part of that
+pipeline. Validation has been consolidated into `validation_of_emission_model.ipynb`;
+the Pisa/Borghetto/Passi sensor comparisons there are supplementary and were not
+reported in the INTSYS paper, but are kept for provenance.
 
 ## Known limitations
 
 Please read this before trying to run the pipeline.
 
-**Both third-party dependencies of step 1 are now resolvable.** Neither is on
+**Both third-party dependencies of step 1 are resolvable.** Neither is on
 PyPI, so neither appears in `requirements.txt`:
 
 - **`mobair`** — provides trajectory filtering, speed and acceleration
@@ -72,11 +106,11 @@ PyPI, so neither appears in `requirements.txt`:
 
   That repository was formerly named `mobility_airpollution`, which is why this
   pipeline refers to it by that name in places. The old URL still redirects.
-  Step 1 now imports it as `mobair`, matching that project's own documented
+  Step 1 imports it as `mobair`, matching that project's own documented
   usage, rather than treating a repository name as a Python package.
 - **`util_funcs`** — was never committed to the author's earlier repository. The
   two functions step 1 needs, `download_square_tessellation(...)` and
-  `select_trajectories_within_tessellation(...)`, are now provided in
+  `select_trajectories_within_tessellation(...)`, are provided in
   `util_funcs.py` in this repository.
 
 **What still blocks step 1 is the input data, not the code.** Step 1 reads
@@ -95,15 +129,14 @@ deliberately **not** reproduced: it is not needed for the tessellation stage, an
 `environment.yml`, which is consistent with the `osmnx` 1.x constraint below.
 
 Steps 2–4 (the notebooks) depend only on publicly available packages and are
-the substantive part of the pipeline. The notebook outputs are committed
-because they are the figures and validation results reported in the paper.
+the substantive part of the pipeline. Most committed outputs are the figures
+and validation results reported in the paper; the supplementary Pisa sensor
+comparisons are kept for provenance.
 
-**Environment fragility.** The notebooks target the `osmnx` 1.x API. A stored
-traceback in `3_4_dispersion_and_exposure.ipynb` records a failure against
-`osmnx` 2.x (`module 'osmnx' has no attribute 'bbox_from_place'`), which is why
-`requirements.txt` pins `osmnx>=1.4,<2.0`. Three further stored tracebacks
-(`KeyError: 'week'`, `NameError: name 'df_sorted' is not defined`) are
-mid-notebook development artefacts, not part of the final result.
+**Environment fragility.** The notebooks target the `osmnx` 1.x API; newer 2.x
+releases remove or change top-level helpers such as `osmnx.graph_from_bbox` and
+`osmnx.geometries_from_bbox`, which is why `requirements.txt` pins
+`osmnx>=1.4,<2.0`.
 
 `util_funcs.select_trajectories_within_tessellation(...)` uses
 `DataFrameGroupBy.apply`, which recent pandas releases warn about
@@ -155,20 +188,19 @@ The key is passed **directly as the `key` argument** of that function:
 
 ```python
 get_route_tomtom(start_lat, start_lon, end_lat, end_lon,
-                 departure_time_start, key=YOUR_TOMTOM_API_KEY)
+                 departure_time_start, key='YOUR_TOMTOM_API_KEY')
 ```
 
-The notebook does not read any environment variable or secrets file, and no key
+The notebook contains only the placeholder `YOUR_TOMTOM_API_KEY`; no real key
 is stored in this repository. Pass your own key from your own wrapper rather
-than editing the notebook.
+than committing one here.
 
-## Repository history
-
-`3_4_dispersion_and_exposure.ipynb` (steps 3 and 4) was inadvertently truncated
-to 2 bytes by a file rename in November 2024 and was non-functional until
-restored from commit `5cb6b6f` (October 2026). The restored file is
-byte-identical to the last good revision, verified by git blob hash
-`81b7a9dd3c5a95bdbe2b20fead3bd121d492c8af`.
+TomTom is only needed to regenerate the specific alternative pedestrian routes
+used in the paper's walking-exposure example. The exposure calculation itself
+accepts any sequence of `(latitude, longitude)` points, so routes from
+OpenStreetMap/networkx, recorded trajectories, or manually supplied coordinates
+work without a TomTom key. The four routes reported in the paper were generated
+with TomTom.
 
 ## License
 
@@ -180,4 +212,5 @@ covered by this license; it carries its own MIT license from its authors.
 ## Acknowledgement
 
 This pipeline was developed with Mirco Nanni (ISTI-CNR), who co-authored the
-paper and provided the emission-modelling modules.
+paper and provided the emission-modelling modules. His GitHub profile is
+<https://github.com/mirconanni>.

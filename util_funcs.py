@@ -11,6 +11,9 @@ PostgreSQL downloader (`download_trajectories`) for the restricted vehicular GPS
 traces held in the KDD Lab database; that code is deliberately omitted, and with
 it any credential handling. Nothing in this file reads or requires credentials.
 
+In plain terms, the code first lays a square grid over the city and then keeps
+only the vehicle trajectories whose points fall inside that grid.
+
 The two functions depend only on `scikit-mobility`, which the rest of step 1
 already requires.
 """
@@ -47,7 +50,7 @@ def select_trajectories_within_tessellation(tdf, tessellation):
     Parameters
     ----------
     tdf : TrajDataFrame
-        the TrajDataFrame the describe the trajectories
+        the TrajDataFrame that describes the trajectories
 
     tessellation : GeoDataFrame
         the GeoDataFrame describing the spatial tessellation
@@ -73,7 +76,7 @@ def select_trajectories_within_tessellation(tdf, tessellation):
         Returns
         -------
         TrajDataFrame
-            the a user's trajectory
+            a user's trajectory
         """
         if not tdf['tile_ID'].isna().values.any():
             return tdf

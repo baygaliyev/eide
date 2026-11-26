@@ -1,14 +1,14 @@
 # Runtime dependencies for the EIDE pipeline.
 #
-# One dependency of step 1 is NOT on PyPI and is therefore absent from this
-# list; see "Known limitations" in README.md.
+# Two step-1 dependencies are not on PyPI: mobair (install from GitHub) and
+# util_funcs (included here as util_funcs.py). See "Known limitations" in README.md.
 #
 #   mobair  --  pip install git+https://github.com/matteoboh/mobility_emissions.git
 #              (formerly named mobility_airpollution; MIT licensed; pins
 #               osmnx==1.1.1 and scikit-mobility==1.2.2 in its environment.yml)
 #
-# `util_funcs` was a second blocker and is now resolved: the two tessellation
-# helpers step 1 needs are included in util_funcs.py in this repository.
+# `util_funcs` is included here as util_funcs.py with the two tessellation
+# helpers step 1 needs.
 
 # --- core scientific stack ---
 numpy>=1.21
@@ -22,10 +22,8 @@ pyproj>=3.2
 networkx>=2.6
 
 # osmnx is constrained to the 1.x series on purpose.
-# The notebooks were authored against the osmnx 1.x top-level API; the call
-# `osmnx.bbox_from_place(...)` used in step 3/4 no longer exists in osmnx 2.x.
-# A stored traceback in 3_4_dispersion_and_exposure.ipynb records exactly this
-# failure ("module 'osmnx' has no attribute 'bbox_from_place'").
+# The notebooks were authored against the osmnx 1.x top-level API; calls such
+# as `graph_from_bbox(...)` and `geometries_from_bbox(...)` changed in osmnx 2.x.
 osmnx>=1.4,<2.0
 
 # --- plotting / figures ---
